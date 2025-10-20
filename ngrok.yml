@@ -1,0 +1,7 @@
+version: "2"
+authtoken: 2vYjT5j40edREjK6Qbpysfr5TyK_4qhEj643Y4rxNCHoM1wPo
+tunnels:
+  be-orchestrator:
+    addr: be-orchestrator:3000
+    proto: http
+    domain: preferably-upright-walleye.ngrok-free.app
