@@ -1,1 +1,1 @@
-docker compose -f docker-compose.yaml --env-file .env.local -p fotff down -d
+sudo docker compose -f docker-compose.yaml --env-file .env.local -p fotff down -d
