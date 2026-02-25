@@ -55,7 +55,10 @@ services:
         "
   
   be-orchestrator:
-    image: trkhang4444/fotf:1.0.0-be_staging
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: fotff-be-local:dev
     depends_on:
       - mongo
       - redis
@@ -65,9 +68,14 @@ services:
     networks:
       - fotff
     volumes:
-      - ./appsettings.json:/usr/src/app/dist/appsettings.json:ro
+      - ./appsettings.json:/usr/src/app/dist/src/appsettings.json:ro
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    command:
+      - /bin/sh
+      - -c
+      - |
+        NODE_PATH=/usr/src/app/dist node /usr/src/app/dist/src/main.js
     restart: unless-stopped
 
   ngrok:
