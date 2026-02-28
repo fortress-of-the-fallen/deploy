@@ -49,8 +49,8 @@ services:
           sleep 5;
           mc alias set myminio http://minio:9000 ${MINIO_ROOTUSER} ${MINIO_ROOTPASSWORD} &&
           mc mb myminio/${MINIO_BUCKET_NAME} || true &&
-          mc admin user add myminio ${MINIO_USER} ${MINIO_USERPASSWORD} &&
-          mc admin policy attach myminio readwrite --user ${MINIO_USER}
+          mc admin user add myminio ${MINIO_USER} ${MINIO_USERPASSWORD} || true &&
+          mc admin policy attach myminio readwrite --user ${MINIO_USER} || true
           echo 'MinIO user created';
         "
   
@@ -72,19 +72,33 @@ services:
       - /bin/sh
       - -c
       - |
-        NODE_PATH=/usr/src/app/dist node /usr/src/app/dist/src/main.js
+        mkdir -p /usr/src/app/dist/src;
+        for d in /usr/src/app/dist/*; do
+          bn=$$(basename "$$d");
+          [ "$$bn" = "src" ] && continue;
+          if [ -d "$$d" ]; then
+            rm -rf "/usr/src/app/dist/src/$$bn" || true;
+            ln -sfn "../$$bn" "/usr/src/app/dist/src/$$bn";
+          fi;
+        done;
+        for f in /usr/src/app/dist/api/controller/v1/*.js; do
+          b=$$(basename "$$f" .js);
+          [ -f "/usr/src/app/dist/src/api/controller/v1/$$b.d.ts" ] || rm -f "/usr/src/app/dist/api/controller/v1/$$b.js" "/usr/src/app/dist/api/controller/v1/$$b.js.map" "/usr/src/app/dist/api/controller/v1/$$b.d.ts";
+        done;
+        rm -f /usr/src/app/dist/api/controller/v1/admin.controller.js /usr/src/app/dist/api/controller/v1/admin.controller.js.map /usr/src/app/dist/api/controller/v1/admin.controller.d.ts || true;
+        rm -f /usr/src/app/dist/api/controller/v1/game-user.controller.js /usr/src/app/dist/api/controller/v1/game-user.controller.js.map /usr/src/app/dist/api/controller/v1/game-user.controller.d.ts || true;
+        ENTRY="/usr/src/app/dist/src/main.js";
+        [ -f "$$ENTRY" ] || ENTRY="/usr/src/app/dist/main.js";
+        NODE_PATH=/usr/src/app/dist node "$$ENTRY"
     restart: unless-stopped
 
   ngrok:
     image: ngrok/ngrok:latest
-    restart: unless-stopped
+    restart: "no"
     command:
-      - "start"
-      - "--all"
-      - "--config"
-      - "/etc/ngrok.yml"
-    volumes:
-      - ./ngrok.yml:/etc/ngrok.yml
+      - "http"
+      - "be-orchestrator:3000"
+      - "--url=preferably-upright-walleye.ngrok-free.app"
     networks:
       - fotff
     environment:
