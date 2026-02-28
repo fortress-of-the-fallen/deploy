@@ -55,7 +55,7 @@ services:
         "
   
   be-orchestrator:
-    image: fotff-be-local:dev
+    image: trkhang4444/fotf:1.0.0-be_staging
     depends_on:
       - mongo
       - redis
