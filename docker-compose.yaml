@@ -55,9 +55,6 @@ services:
         "
   
   be-orchestrator:
-    build:
-      context: ..
-      dockerfile: Dockerfile
     image: fotff-be-local:dev
     depends_on:
       - mongo
